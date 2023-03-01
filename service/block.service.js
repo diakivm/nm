@@ -49,7 +49,7 @@ const setBlocksTransactionsInDB = async (blockNumber, latestBlockNumber) => {
         console.error(error)
     } finally {
         await sleep(+process.env.SLEEP_TIME_ON_LOAD_TRANSACTIONS);
-        return setBlockTransactionsInDB(++blockNumber, latestBlockNumber)
+        return setBlocksTransactionsInDB(++blockNumber, latestBlockNumber)
     }
 }
 
@@ -59,7 +59,7 @@ const getLatestBlockNumber = async () => {
             params: {
                 module: 'proxy',
                 action: 'eth_blockNumber',
-                apikey: 'YOUR_API_KEY'
+                apikey: process.env.ETHERSCAN_API_KEY
             }
         });
 
@@ -77,7 +77,7 @@ const getBlockTransactions = async (blockNumber) => {
                 action: 'eth_getBlockByNumber',
                 tag: blockNumber,
                 boolean: true,
-                apikey: 'YOUR_API_KEY'
+                apikey: process.env.ETHERSCAN_API_KEY
             }
         });
 
