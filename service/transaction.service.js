@@ -23,7 +23,7 @@ module.exports = {
 
         const query = Transaction.find(filters);
 
-        const totalCount = await query.countDocuments();
+        const totalCount = await Transaction.find(filters).countDocuments();
         const totalPages = Math.ceil(totalCount / limit);
 
         query.skip((page - 1) * limit).limit(limit);
