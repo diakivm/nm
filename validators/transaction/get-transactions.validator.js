@@ -1,8 +1,10 @@
 const Joi = require('joi');
 
 module.exports = Joi.object({
-    page: Joi.number().min(1),
-    limit: Joi.number().min(1),
-    from: Joi.string().hex().length(42),
-    to: Joi.string().hex().length(42),
+    fromAddress: Joi.string(),
+    toAddress: Joi.string(),
+    id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    blockNumber: Joi.number().integer().min(0),
+    page: Joi.number().integer().min(1),
+    limit: Joi.number().integer().min(1).max(100),
 });
