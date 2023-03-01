@@ -1,4 +1,4 @@
 module.exports = {
     errorCodesEnum: require('./error-codes.enum'),
-    regexpEnum: require('./regexp.enum'),
+    etherscanActionsEnum: require('./etherscan-actions.enum'),
 };

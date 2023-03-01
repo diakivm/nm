@@ -2,27 +2,32 @@ const axios = require("axios");
 
 const { Transaction } = require("../db/model");
 const { sleep } = require("../helpers");
+const { TRANSACTIONS_COUNT_ON_INIT, SLEEP_TIME_ON_LOAD_TRANSACTIONS, ETHERSCAN_API_KEY } = require("../config/config");
+const { GET_BY_BLOCK_NUMBER, BLOCK_NUMBER } = require("../constans/etherscan-actions.enum");
 
 const initDBWithBlockTransactions = async () => {
 
-    const countOfTransactionsInDb = await Transaction.countDocuments();
-    if (countOfTransactionsInDb > 0) {
-        return;
+    try {
+        const countOfTransactionsInDb = await Transaction.countDocuments();
+        if (countOfTransactionsInDb > 0) {
+            return;
+        }
+
+        const latestBlockNumber = await getLatestBlockNumber();
+
+        let blockNumber = latestBlockNumber - TRANSACTIONS_COUNT_ON_INIT;
+        if (blockNumber < 0) {
+            blockNumber = 0;
+        }
+
+        await setBlocksTransactionsInDB(blockNumber, latestBlockNumber)
+    } catch (error) {
+        console.error(error)
     }
-
-    const latestBlockNumber = await getLatestBlockNumber();
-
-    let blockNumber = latestBlockNumber - +process.env.TRANSACTIONS_COUNT_ON_INIT || 1000;
-    if (blockNumber < 0) {
-        blockNumber = 0;
-    }
-
-    await setBlocksTransactionsInDB(blockNumber, latestBlockNumber)
 }
 
 const setBlocksTransactionsInDB = async (blockNumber, latestBlockNumber) => {
     try {
-
         if (blockNumber > latestBlockNumber) {
             return;
         }
@@ -41,14 +46,13 @@ const setBlocksTransactionsInDB = async (blockNumber, latestBlockNumber) => {
         });
 
         await Transaction.insertMany(transactions);
-        await Transaction.updateMany({ blockNumber: { $lt: blockNumber } }, { $inc: { confirmations: 1 } });
+        await Transaction.updateMany({ blockNumber: { $lt: blockNumber }}, { $inc: { confirmations: 1 } });
 
-        console.log(`Initialized ${transactions.length} transactions from block ${blockNumber}`);
-
+        console.log(`Initialized ${ transactions.length } transactions from block ${ blockNumber }`);
     } catch (error) {
         console.error(error)
     } finally {
-        await sleep(+process.env.SLEEP_TIME_ON_LOAD_TRANSACTIONS);
+        await sleep(SLEEP_TIME_ON_LOAD_TRANSACTIONS);
         return setBlocksTransactionsInDB(++blockNumber, latestBlockNumber)
     }
 }
@@ -58,8 +62,8 @@ const getLatestBlockNumber = async () => {
         const response = await axios.get('https://api.etherscan.io/api', {
             params: {
                 module: 'proxy',
-                action: 'eth_blockNumber',
-                apikey: process.env.ETHERSCAN_API_KEY
+                action: BLOCK_NUMBER,
+                apikey: ETHERSCAN_API_KEY
             }
         });
 
@@ -74,10 +78,10 @@ const getBlockTransactions = async (blockNumber) => {
         const response = await axios.get('https://api.etherscan.io/api', {
             params: {
                 module: 'proxy',
-                action: 'eth_getBlockByNumber',
+                action: GET_BY_BLOCK_NUMBER,
                 tag: blockNumber,
                 boolean: true,
-                apikey: process.env.ETHERSCAN_API_KEY
+                apikey: ETHERSCAN_API_KEY
             }
         });
 

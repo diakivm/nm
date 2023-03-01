@@ -1,43 +1,40 @@
 const axios = require("axios");
 
 const { Transaction } = require("../db/model");
-const { blockService } = require("./index");
-const { sleep } = require("../helpers");
 
 module.exports = {
 
-    getTransactions: async () => {
-        const url = `https://api.etherscan.io/api?module=proxy&action=eth_getBlockByNumber&tag=latest&boolean=true&apikey=${process.env.ETHERSCAN_API_KEY}`;
+    getTransactions: async (queryFilters) => {
+        const {
+            fromAddress,
+            toAddress,
+            id,
+            blockNumber,
+            page = 1,
+            limit = 10,
+        } = queryFilters;
 
-        try {
-            const response = await axios.get(url);
+        const filters = {
+            ...(fromAddress && { from: fromAddress }),
+            ...(toAddress && { to: toAddress }),
+            ...(id && { _id: id }),
+            ...(blockNumber && { blockNumber })
+        };
 
-            if (response.status === 200) {
-                const blockNumber = parseInt(response.data.result.number, 16);
+        const query = Transaction.find(filters);
 
-                const block = await blockService.getBlock(blockNumber);
+        const totalCount = await Transaction.find(filters).countDocuments();
+        const totalPages = Math.ceil(totalCount / limit);
 
-                const transactions = block.transactions.map((tx) => {
-                    return {
-                        hash: tx.hash,
-                        blockNumber,
-                        from: tx.from,
-                        to: tx.to,
-                        value: parseInt(tx.value, 16),
-                        timestamp: block.timestamp,
-                    };
-                });
+        query.skip((page - 1) * limit).limit(limit);
 
-                await Transaction.insertMany(transactions);
+        const list = await query.exec();
 
-                console.log(`Fetched ${transactions.length} transactions from block ${blockNumber}`);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-
-        await sleep(1000); // Wait for 1 second
-        await this.getTransactions(); // Fetch transactions again
+        return {
+            totalCount,
+            totalPages,
+            list,
+        };
     },
 
 };
