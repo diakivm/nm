@@ -1,13 +1,16 @@
 const { transactionService } = require('../service');
+const {getTransactionsValidator} = require("../validators/transaction");
 
 module.exports = {
     getTransactions: async (req, res) => {
         try {
-            const data = await transactionService.getTransactions();
+            const filter = getTransactionsValidator.validate(req.query);
 
-            res.json(data);
-        } catch (e) {
-            res.status(400).json(e.message);
+            const transactions = await transactionService.getTransactions(filter);
+
+            res.json(transactions);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
         }
     },
 };

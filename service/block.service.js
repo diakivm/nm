@@ -5,24 +5,27 @@ const { sleep } = require("../helpers");
 
 const initDBWithBlockTransactions = async () => {
 
-    const countOfTransactionsInDb = await Transaction.countDocuments();
-    if (countOfTransactionsInDb > 0) {
-        return;
+    try {
+        const countOfTransactionsInDb = await Transaction.countDocuments();
+        if (countOfTransactionsInDb > 0) {
+            return;
+        }
+
+        const latestBlockNumber = await getLatestBlockNumber();
+
+        let blockNumber = latestBlockNumber - +process.env.TRANSACTIONS_COUNT_ON_INIT || 1000;
+        if (blockNumber < 0) {
+            blockNumber = 0;
+        }
+
+        await setBlocksTransactionsInDB(blockNumber, latestBlockNumber)
+    } catch (error) {
+        console.error(error)
     }
-
-    const latestBlockNumber = await getLatestBlockNumber();
-
-    let blockNumber = latestBlockNumber - +process.env.TRANSACTIONS_COUNT_ON_INIT || 1000;
-    if (blockNumber < 0) {
-        blockNumber = 0;
-    }
-
-    await setBlocksTransactionsInDB(blockNumber, latestBlockNumber)
 }
 
 const setBlocksTransactionsInDB = async (blockNumber, latestBlockNumber) => {
     try {
-
         if (blockNumber > latestBlockNumber) {
             return;
         }
@@ -41,10 +44,9 @@ const setBlocksTransactionsInDB = async (blockNumber, latestBlockNumber) => {
         });
 
         await Transaction.insertMany(transactions);
-        await Transaction.updateMany({ blockNumber: { $lt: blockNumber } }, { $inc: { confirmations: 1 } });
+        await Transaction.updateMany({ blockNumber: { $lt: blockNumber }}, { $inc: { confirmations: 1 } });
 
-        console.log(`Initialized ${transactions.length} transactions from block ${blockNumber}`);
-
+        console.log(`Initialized ${ transactions.length } transactions from block ${ blockNumber }`);
     } catch (error) {
         console.error(error)
     } finally {
