@@ -33,10 +33,10 @@ app.use('*', (err, req, res, next) => {
 
 app.listen(PORT, () => console.log('Server work'));
 
-function _connectDb() {
+ function _connectDb() {
     mongoose.connect(MONGO_DB, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
 
-        blockService.initDBWithTransactions()
+        blockService.initDBWithBlockTransactions()
 
         const { connection } = mongoose;
 
