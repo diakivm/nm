@@ -2,6 +2,8 @@ const axios = require("axios");
 
 const { Transaction } = require("../db/model");
 const { sleep } = require("../helpers");
+const { TRANSACTIONS_COUNT_ON_INIT, SLEEP_TIME_ON_LOAD_TRANSACTIONS, ETHERSCAN_API_KEY } = require("../config/config");
+const { GET_BY_BLOCK_NUMBER, BLOCK_NUMBER } = require("../constans/etherscan-actions.enum");
 
 const initDBWithBlockTransactions = async () => {
 
@@ -13,7 +15,7 @@ const initDBWithBlockTransactions = async () => {
 
         const latestBlockNumber = await getLatestBlockNumber();
 
-        let blockNumber = latestBlockNumber - +process.env.TRANSACTIONS_COUNT_ON_INIT || 1000;
+        let blockNumber = latestBlockNumber - TRANSACTIONS_COUNT_ON_INIT;
         if (blockNumber < 0) {
             blockNumber = 0;
         }
@@ -50,7 +52,7 @@ const setBlocksTransactionsInDB = async (blockNumber, latestBlockNumber) => {
     } catch (error) {
         console.error(error)
     } finally {
-        await sleep(+process.env.SLEEP_TIME_ON_LOAD_TRANSACTIONS);
+        await sleep(SLEEP_TIME_ON_LOAD_TRANSACTIONS);
         return setBlocksTransactionsInDB(++blockNumber, latestBlockNumber)
     }
 }
@@ -60,8 +62,8 @@ const getLatestBlockNumber = async () => {
         const response = await axios.get('https://api.etherscan.io/api', {
             params: {
                 module: 'proxy',
-                action: 'eth_blockNumber',
-                apikey: process.env.ETHERSCAN_API_KEY
+                action: BLOCK_NUMBER,
+                apikey: ETHERSCAN_API_KEY
             }
         });
 
@@ -76,10 +78,10 @@ const getBlockTransactions = async (blockNumber) => {
         const response = await axios.get('https://api.etherscan.io/api', {
             params: {
                 module: 'proxy',
-                action: 'eth_getBlockByNumber',
+                action: GET_BY_BLOCK_NUMBER,
                 tag: blockNumber,
                 boolean: true,
-                apikey: process.env.ETHERSCAN_API_KEY
+                apikey: ETHERSCAN_API_KEY
             }
         });
 
