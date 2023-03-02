@@ -13,7 +13,7 @@ const app = experess();
 _connectDb();
 
 const { apiRouter } = require('./router');
-const {blockService} = require("./service");
+const { blockService } = require("./service");
 
 app.use(fileUpload());
 app.use(experess.json());

@@ -21,14 +21,14 @@ module.exports = {
             ...(blockNumber && { blockNumber })
         };
 
-        const query = Transaction.find(filters);
 
         const totalCount = await Transaction.find(filters).countDocuments();
         const totalPages = Math.ceil(totalCount / limit);
 
-        query.skip((page - 1) * limit).limit(limit);
-
-        const list = await query.exec();
+        const list = await Transaction.find(filters)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .exec()
 
         return {
             totalCount,
