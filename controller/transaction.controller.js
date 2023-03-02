@@ -1,6 +1,6 @@
 const { transactionService } = require('../service');
-const {getTransactionsValidator} = require("../validators/transaction");
-const {errorCodesEnum} = require("../constans");
+const { getTransactionsValidator } = require("../validators/transaction");
+const { errorCodesEnum } = require("../constans");
 
 module.exports = {
     getTransactions: async (req, res) => {
