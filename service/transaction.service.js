@@ -17,7 +17,7 @@ module.exports = {
         const filters = {
             ...(fromAddress && { from: fromAddress }),
             ...(toAddress && { to: toAddress }),
-            ...(id && { _id: id }),
+            ...(id && { hash: id }),
             ...(blockNumber && { blockNumber })
         };
 
