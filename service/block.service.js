@@ -40,6 +40,8 @@ const setBlocksTransactionsInDB = async (blockNumber, latestBlockNumber) => {
                 blockNumber,
                 from: tx.from,
                 to: tx.to,
+                gas: tx.parseInt(tx.gas, 16),
+                gasPrice: parseInt(tx.gasPrice, 16),
                 value: parseInt(tx.value, 16),
                 timestamp: block.timestamp,
             };

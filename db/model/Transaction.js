@@ -22,6 +22,14 @@ const transactionSchema = new Schema({
         type: Number,
         required: true,
     },
+    gas: {
+        type: Number,
+        required: true,
+    },
+    gasPrice: {
+        type: Number,
+        required: true,
+    },
     timestamp: {
         type: Number,
         required: true,
