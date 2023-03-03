@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  nm-app:
+    build: .
+    env_file: ./.env
+    volumes:
+      - .:/app/
+      - /app/node_modules
+    ports:
+      - "${PORT}:4000"
+    command: npm run start

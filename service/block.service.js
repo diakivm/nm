@@ -2,7 +2,7 @@ const axios = require("axios");
 
 const { Transaction } = require("../db/model");
 const { sleep } = require("../helpers");
-const { TRANSACTIONS_COUNT_ON_INIT, SLEEP_TIME_ON_LOAD_TRANSACTIONS, ETHERSCAN_API_KEY } = require("../config/config");
+const { BLOCKS_COUNT_ON_INIT, SLEEP_TIME_ON_LOAD_BLOCKS, ETHERSCAN_API_KEY } = require("../config/config");
 const { GET_BY_BLOCK_NUMBER, BLOCK_NUMBER } = require("../constans/etherscan-actions.enum");
 
 const initDBWithBlockTransactions = async () => {
@@ -15,7 +15,7 @@ const initDBWithBlockTransactions = async () => {
 
         const latestBlockNumber = await getLatestBlockNumber();
 
-        let blockNumber = latestBlockNumber - TRANSACTIONS_COUNT_ON_INIT;
+        let blockNumber = latestBlockNumber - BLOCKS_COUNT_ON_INIT;
         if (blockNumber < 0) {
             blockNumber = 0;
         }
@@ -54,7 +54,7 @@ const setBlocksTransactionsInDB = async (blockNumber, latestBlockNumber) => {
     } catch (error) {
         console.error(error)
     } finally {
-        await sleep(SLEEP_TIME_ON_LOAD_TRANSACTIONS);
+        await sleep(SLEEP_TIME_ON_LOAD_BLOCKS);
         return setBlocksTransactionsInDB(++blockNumber, latestBlockNumber)
     }
 }
